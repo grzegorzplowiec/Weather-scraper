@@ -10,6 +10,8 @@ import time
 
 chrome_options = Options()
 chrome_options.add_argument("--headless") 
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -28,8 +30,8 @@ while True:
     driver.get("https://www.accuweather.com/")
 
 
-    city = input("Wpisz nazwę miejscowości żeby sprawdzić prognozę pogody: ")
-    print(f"Zbieram dane dla miejscowości: {city}. Proszę o chwilę cierpliwości...")
+    city = input("Enter city name to check the weather forecast: ")
+    print(f"Data collection for location: {city}. Please be patient...")
     location = ""
     back_to_start = False
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -49,7 +51,7 @@ while True:
         WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "p.search-bar-result__name"))).text.lower() == city.lower()
     except Exception as e:
         back_to_start = True
-        print(f"Nie znaleziono miejscowości \"{city}\" w bazie\nSprawdź czy poprawnie wpisałeś/aś nazwę miejscowości.")
+        print(f"Location not found (\"{city}\").\nCheck if you have entered the name of the town correctly.")
         time.sleep(2)
         
     if back_to_start == True:
@@ -59,7 +61,7 @@ while True:
             WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
                 (By.XPATH,f"//p[@class='search-bar-result__name' and translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='{city.lower()}']"))).click()
         except Exception as e:
-            print(f"Nie znaleziono miejscowości \"{city}\" w bazie.\nSprawdź czy poprawnie wpisałeś/aś nazwę miejscowości.")
+            print(f"Location not found (\"{city}\").\nCheck if you have entered the name of the town correctly.")
             time.sleep(5)
             sys.exit()
 
@@ -89,29 +91,29 @@ while True:
         next_days_weather[WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[class='two-column-page-content '] a:nth-child(5) div:nth-child(1) p:nth-child(1)"))).text] = [WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[class='daily-list content-module'] a:nth-child(5) div:nth-child(1) p:nth-child(2)"))).text, (WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[class='daily-list content-module'] a:nth-child(5) div:nth-child(3) span:nth-child(1)"))).text)+"C", WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[class='daily-list content-module'] a:nth-child(5) div:nth-child(4) p:nth-child(1)"))).text, WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[class='daily-list content-module'] a:nth-child(5) div:nth-child(5)"))).text]
 
         # Returning data
-        print("\nPrognoza pogody dla: " + location + ", na dzień: " + current_datetime+"\n")
-        print("Alerty: "+ current_weather["alert"])
-        print("Zachmurzenie: "+ current_weather["sky"])
-        print("Temperatura otoczenia: "+ current_weather["ambient_temperature"])
-        print("Temperatura odczuwalna: "+ current_weather["perceived_temperature"])
-        print("Wiatr: "+ current_weather["wind"])
-        print("Porywy wiatru: "+ current_weather["wind_gusts"])
-        print("Jakość powietrza: "+ current_weather["air_quality"]+"\n")
-        print("Prognoza na kolejne dni:" )
+        print("\nWeather forecast for: " + location + ", on day: " + current_datetime+"\n")
+        print("Alerts: "+ current_weather["alert"])
+        print("Cloud cover: "+ current_weather["sky"])
+        print("Ambient temperature: "+ current_weather["ambient_temperature"])
+        print("Apparent temperature: "+ current_weather["perceived_temperature"])
+        print("Wind: "+ current_weather["wind"])
+        print("Wind gusts: "+ current_weather["wind_gusts"])
+        print("Air quality: "+ current_weather["air_quality"]+"\n")
+        print("Forecast for the next few days:" )
         for key,value in next_days_weather.items():
             tekst = (
                 f"{key} ({value[0]}): "
-                f"Temperatura: {value[1]}, "
-                f"Zachmurzenie: {value[2]}, "
-                f"Prawdopodobieństwo opadów: {value[3]}"
+                f"Temperature: {value[1]}, "
+                f"Cloud cover: {value[2]}, "
+                f"Precipitation probability: {value[3]}"
             )
             print(tekst)
 
-        answer = input("\nJeśli chcesz wybrać inną miejscowość wpisz: \"tak\", aby zakończyć wpisz dowolną literę...").strip().lower()
+        answer = input("\nIf you want to choose another location, enter: \"yes\", to finish type any letter...").strip().lower()
         
-        if answer == "tak":
+        if answer == "yes":
             continue
         else:
-            print("Koniec programu. Do zobaczenia!")
+            print("Thank you and see you soon!")
             time.sleep(1)
             break
